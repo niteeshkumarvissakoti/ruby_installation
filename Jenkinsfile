@@ -2,37 +2,44 @@ pipeline {
     agent any
 
     environment {
-        FILENAME = "ruby_install_status_${BUILD_NUMBER}.txt"
+        REMOTE_HOST = "niteesh@10.22.124.96"  // Replace with actual user@ip
+        OUTPUT_FILE = "ruby_install_status_${BUILD_NUMBER}.txt"
     }
 
     stages {
-        stage('Verify Ruby') {
+        stage('Install Ruby on Remote VM') {
             steps {
-                sh '''
-                echo "Checking for Ruby installation..."
+                sshagent(credentials: ['9eca6004-5249-495c-96b3-65a4148a2caf']) {
+                    sh """
+                    ssh -o StrictHostKeyChecking=no $REMOTE_HOST '
+                        if command -v ruby > /dev/null; then
+                            echo "Ruby already installed"
+                            ruby --version
+                        else
+                            echo "Installing Ruby..."
+                            sudo yum install -y ruby
+                        fi
 
-                if command -v ruby > /dev/null 2>&1; then
-                    echo "Ruby is already installed."
-                    ruby --version
-                else
-                    echo "Ruby not found. Installing Ruby..."
-                    sudo yum install -y ruby
-                fi
-                '''
+                        echo "Installation completed successfully (build $BUILD_NUMBER)" > ~/ruby_install_status.txt
+                    '
+                    """
+                }
             }
         }
 
-        stage('Write Status File') {
+        stage('Copy Status File Back (Optional)') {
             steps {
-                sh '''
-                echo "Installation completed successfully for build $BUILD_NUMBER" > $FILENAME
-                '''
+                sshagent(credentials: ['9eca6004-5249-495c-96b3-65a4148a2caf']) {
+                    sh """
+                    scp -o StrictHostKeyChecking=no $REMOTE_HOST:~/ruby_install_status.txt $OUTPUT_FILE
+                    """
+                }
             }
         }
 
-        stage('Archive Status') {
+        stage('Archive Status File') {
             steps {
-                archiveArtifacts artifacts: '${FILENAME}', allowEmptyArchive: false
+                archiveArtifacts artifacts: "${OUTPUT_FILE}", allowEmptyArchive: false
             }
         }
     }
