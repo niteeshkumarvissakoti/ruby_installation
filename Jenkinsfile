@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Install Ruby on Remote VM') {
             steps {
-                sshagent(credentials: ['9eca6004-5249-495c-96b3-65a4148a2caf']) {
+                sshagent(credentials: ['43abd6be-97dd-47b1-b11c-6d63b21356ca']) {
                     sh """
                     ssh -o StrictHostKeyChecking=no $REMOTE_HOST '
                         if command -v ruby > /dev/null; then
@@ -29,7 +29,7 @@ pipeline {
 
         stage('Copy Status File Back (Optional)') {
             steps {
-                sshagent(credentials: ['9eca6004-5249-495c-96b3-65a4148a2caf']) {
+                sshagent(credentials: ['43abd6be-97dd-47b1-b11c-6d63b21356ca']) {
                     sh """
                     scp -o StrictHostKeyChecking=no $REMOTE_HOST:~/ruby_install_status.txt $OUTPUT_FILE
                     """
