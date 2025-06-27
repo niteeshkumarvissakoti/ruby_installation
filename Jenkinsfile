@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        REMOTE_HOST = "niteesh@10.22.124.96"  // Replace with actual user@ip
+        REMOTE_HOST = "weblogic@10.22.124.96"  // Replace with actual user@ip
         OUTPUT_FILE = "ruby_install_status_${BUILD_NUMBER}.txt"
     }
 
